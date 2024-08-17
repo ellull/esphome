@@ -1,7 +1,13 @@
 import esphome.codegen as cg
-import esphome.config_validation as cv
 from esphome.components import i2c
-from esphome.const import CONF_ID, CONF_INVERTED, CONF_RESOLUTION
+import esphome.config_validation as cv
+from esphome.const import (
+    CONF_AUTO_MODE,
+    CONF_DISABLED,
+    CONF_ID,
+    CONF_INVERTED,
+    CONF_RESOLUTION,
+)
 
 CODEOWNERS = ["@ellull"]
 
@@ -13,6 +19,8 @@ CONF_PWM = "pwm"
 CONF_DIVIDER = "divider"
 CONF_DAC = "dac"
 CONF_CONVERSION_RATE = "conversion_rate"
+CONF_BETA_COMPENSATION = "beta_compensation"
+CONF_IDEALITY_FACTOR = "ideality_factor"
 
 CONF_EMC2101_ID = "emc2101_id"
 
@@ -60,6 +68,13 @@ CONFIG_SCHEMA = cv.All(
                 }
             ),
             cv.Optional(CONF_INVERTED, default=False): cv.boolean,
+            cv.Optional(CONF_BETA_COMPENSATION, default="auto"): cv.Any(
+                cv.hex_int_range(min=0x00, max=0x06),
+                cv.one_of(CONF_AUTO_MODE, CONF_DISABLED, lower=True),
+            ),
+            cv.Optional(CONF_IDEALITY_FACTOR, default=0x12): cv.hex_int_range(
+                min=0x08, max=0x37
+            ),
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
@@ -77,7 +92,19 @@ async def to_code(config):
         cg.add(var.set_dac_mode(False))
         cg.add(var.set_pwm_resolution(pwm_config[CONF_RESOLUTION]))
         cg.add(var.set_pwm_divider(pwm_config[CONF_DIVIDER]))
+
     if dac_config := config.get(CONF_DAC):
         cg.add(var.set_dac_mode(True))
         cg.add(var.set_dac_conversion_rate(dac_config[CONF_CONVERSION_RATE]))
+
     cg.add(var.set_inverted(config[CONF_INVERTED]))
+
+    if isinstance(config[CONF_BETA_COMPENSATION], str):
+        if config[CONF_BETA_COMPENSATION] == CONF_DISABLED:
+            cg.add(var.set_beta_compensation(0x07))
+        if config[CONF_BETA_COMPENSATION] == CONF_AUTO_MODE:
+            cg.add(var.set_beta_compensation(0x08))
+    else:
+        cg.add(var.set_beta_compensation(config[CONF_BETA_COMPENSATION]))
+
+    cg.add(var.set_ideality_factor(config[CONF_IDEALITY_FACTOR]))

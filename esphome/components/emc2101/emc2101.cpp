@@ -16,9 +16,11 @@ static const uint8_t EMC2101_ALT_CHIP_ID = 0x28;  // EMC2101 alternate device id
 // EMC2101 registers from the datasheet. We only define what we use.
 static const uint8_t EMC2101_REGISTER_INTERNAL_TEMP = 0x00;      // The internal temperature register
 static const uint8_t EMC2101_REGISTER_EXTERNAL_TEMP_MSB = 0x01;  // high byte for the external temperature reading
+static const uint8_t EMC2101_REGISTER_CONFIG = 0x03;             // Configuration register
 static const uint8_t EMC2101_REGISTER_DAC_CONV_RATE = 0x04;      // DAC convesion rate config
-static const uint8_t EMC2101_REGISTER_EXTERNAL_TEMP_LSB = 0x10;  // low byte for the external temperature reading
-static const uint8_t EMC2101_REGISTER_CONFIG = 0x03;             // configuration register
+static const uint8_t EMC2101_REGISTER_EXTERNAL_TEMP_LSB = 0x10;  // Low byte for the external temperature reading
+static const uint8_t EMC2101_REGISTER_IDEALITY_FACTOR = 0x17;    // Ideality factor register
+static const uint8_t EMC2101_REGISTER_BETA_COMPENSATION = 0x18;  // Beta compensation register
 static const uint8_t EMC2101_REGISTER_TACH_LSB = 0x46;           // Tach RPM data low byte
 static const uint8_t EMC2101_REGISTER_TACH_MSB = 0x47;           // Tach RPM data high byte
 static const uint8_t EMC2101_REGISTER_FAN_CONFIG = 0x4A;         // General fan config register
@@ -88,6 +90,12 @@ void Emc2101Component::setup() {
     // set PWM resolution
     reg(EMC2101_REGISTER_PWM_FREQ) = this->pwm_resolution_;
   }
+
+  // Set the ideality factor
+  reg(EMC2101_REGISTER_IDEALITY_FACTOR) = this->ideality_factor_;
+
+  // Set the beta compensation
+  reg(EMC2101_REGISTER_BETA_COMPENSATION) = this->beta_compensation_;
 }
 
 void Emc2101Component::dump_config() {
@@ -104,6 +112,8 @@ void Emc2101Component::dump_config() {
     ESP_LOGCONFIG(TAG, "  PWM Divider: %02X", this->pwm_divider_);
   }
   ESP_LOGCONFIG(TAG, "  Inverted: %s", YESNO(this->inverted_));
+  ESP_LOGCONFIG(TAG, "  Ideality factor: %02X", this->ideality_factor_);
+  ESP_LOGCONFIG(TAG, "  Beta compensation: %02X", this->beta_compensation_);
 }
 
 void Emc2101Component::set_duty_cycle(float value) {

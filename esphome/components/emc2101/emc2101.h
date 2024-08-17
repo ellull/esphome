@@ -66,6 +66,18 @@ class Emc2101Component : public Component, public i2c::I2CDevice {
    */
   void set_inverted(bool inverted) { this->inverted_ = inverted; }
 
+  /** Sets the beta compensation value.
+   *
+   * @param value The beta compensation value.
+   */
+  void set_beta_compensation(uint8_t value) { this->beta_compensation_ = value; }
+
+  /** Sets the ideality factor value.
+   *
+   * @param value The beta compensation value.
+   */
+  void set_ideality_factor(uint8_t value) { this->ideality_factor_ = value; }
+
   /** Sets the Fan output duty cycle
    *
    * @param value The duty cycle value, from 0.0f to 1.0f.
@@ -108,6 +120,8 @@ class Emc2101Component : public Component, public i2c::I2CDevice {
   uint8_t max_output_value_;
   uint8_t pwm_resolution_;
   uint8_t pwm_divider_;
+  uint8_t beta_compensation_;
+  uint8_t ideality_factor_;
   Emc2101DACConversionRate dac_conversion_rate_;
 };
 
