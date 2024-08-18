@@ -61,7 +61,7 @@ float Emc2101Component::get_setup_priority() const { return setup_priority::HARD
 void Emc2101Component::setup() {
   ESP_LOGCONFIG(TAG, "Setting up Emc2101 sensor...");
 
-  // make sure we're talking to the right chip
+  // Make sure we're talking to the right chip
   uint8_t chip_id = reg(EMC2101_REGISTER_WHOAMI).get();
   if ((chip_id != EMC2101_CHIP_ID) && (chip_id != EMC2101_ALT_CHIP_ID)) {
     ESP_LOGE(TAG, "Wrong chip ID %02X", chip_id);
@@ -70,13 +70,9 @@ void Emc2101Component::setup() {
   }
 
   // Configure EMC2101
-  i2c::I2CRegister config = reg(EMC2101_REGISTER_CONFIG);
-  config |= EMC2101_ALT_TCH_BIT;
+  reg(EMC2101_REGISTER_CONFIG) |= EMC2101_ALT_TCH_BIT;
   if (this->dac_mode_) {
-    config |= EMC2101_DAC_BIT;
-  }
-  if (this->inverted_) {
-    config |= EMC2101_POLARITY_BIT;
+    reg(EMC2101_REGISTER_CONFIG) |= EMC2101_DAC_BIT;
   }
 
   if (this->dac_mode_) {  // DAC mode configurations
@@ -89,6 +85,11 @@ void Emc2101Component::setup() {
 
     // set PWM resolution
     reg(EMC2101_REGISTER_PWM_FREQ) = this->pwm_resolution_;
+  }
+
+  // Invert the output
+  if (this->inverted_) {
+    reg(EMC2101_REGISTER_FAN_CONFIG) |= EMC2101_POLARITY_BIT;
   }
 
   // Set the ideality factor
