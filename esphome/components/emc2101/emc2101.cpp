@@ -106,14 +106,14 @@ void Emc2101Component::dump_config() {
   }
   ESP_LOGCONFIG(TAG, "  Mode: %s", this->dac_mode_ ? "DAC" : "PWM");
   if (this->dac_mode_) {
-    ESP_LOGCONFIG(TAG, "  DAC Conversion Rate: %X", this->dac_conversion_rate_);
+    ESP_LOGCONFIG(TAG, "  DAC Conversion Rate: 0x%02X", this->dac_conversion_rate_);
   } else {
-    ESP_LOGCONFIG(TAG, "  PWM Resolution: %02X", this->pwm_resolution_);
-    ESP_LOGCONFIG(TAG, "  PWM Divider: %02X", this->pwm_divider_);
+    ESP_LOGCONFIG(TAG, "  PWM Resolution: 0x%02X", this->pwm_resolution_);
+    ESP_LOGCONFIG(TAG, "  PWM Divider: 0x%02X", this->pwm_divider_);
   }
   ESP_LOGCONFIG(TAG, "  Inverted: %s", YESNO(this->inverted_));
-  ESP_LOGCONFIG(TAG, "  Ideality factor: %02X", this->ideality_factor_);
-  ESP_LOGCONFIG(TAG, "  Beta compensation: %02X", this->beta_compensation_);
+  ESP_LOGCONFIG(TAG, "  Ideality factor: 0x%02X", this->ideality_factor_);
+  ESP_LOGCONFIG(TAG, "  Beta compensation: 0x%02X", this->beta_compensation_);
 }
 
 void Emc2101Component::set_duty_cycle(float value) {
