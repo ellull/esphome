@@ -48,8 +48,9 @@ void TuyaFan::setup() {
   auto direction_id = this->direction_id_;
   if (direction_id.has_value()) {
     this->parent_->register_listener(*direction_id, [this](const TuyaDatapoint &datapoint) {
-      ESP_LOGD(TAG, "MCU reported reverse direction is: %s", ONOFF(datapoint.value_bool));
-      this->direction = datapoint.value_bool ? fan::FanDirection::REVERSE : fan::FanDirection::FORWARD;
+      bool direction = this->get_actual_direction_(datapoint.value_bool);
+      ESP_LOGD(TAG, "MCU reported reverse direction is: %s", ONOFF(direction));
+      this->direction = direction ? fan::FanDirection::REVERSE : fan::FanDirection::FORWARD;
       this->publish_state();
     });
   }
@@ -109,7 +110,7 @@ void TuyaFan::control(const fan::FanCall &call) {
   if (dir_id.has_value()) {
     auto direction = call.get_direction();
     if (direction.has_value()) {
-      bool enable = *direction == fan::FanDirection::REVERSE;
+      bool enable = this->get_actual_direction_(*direction == fan::FanDirection::REVERSE);
       this->parent_->set_enum_datapoint_value(*dir_id, enable);
     }
   }
